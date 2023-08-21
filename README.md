@@ -38,3 +38,6 @@ PI取钱添加数个预设金额按钮；按空格存钱
 ## 13. [快速起飞](userscripts/快速起飞.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 预选目的地，按空格键起飞
 >预选目的地，按空格键起飞  
+## 14. [BountyPreset](userscripts/BountyPreset.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+Bounty页面自动填写金额
+>代码第15行修改金额  

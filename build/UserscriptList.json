@@ -104,5 +104,13 @@
     "description": "预选目的地，按空格键起飞",
     "detail": "预选目的地，按空格键起飞",
     "version": "1.0"
+  },
+  {
+    "path": "BountyPreset.js",
+    "name": "BountyPreset",
+    "author": "bot_7420[2937420]",
+    "description": "Bounty页面自动填写金额",
+    "detail": "代码第15行修改金额",
+    "version": "1.0"
   }
 ]
