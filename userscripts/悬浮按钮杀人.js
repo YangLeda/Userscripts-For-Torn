@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         一键杀人 GoCrazy
 // @namespace    http://tampermonkey.net/
-// @version      1.6
-// @description  Spam click to finish the fight, even when enemy is in hospital.
+// @version      2.0
+// @description  Spam click to finish the fight, even when enemy is in hospital or travelling.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/loader.php?sid=attack&user2ID=*
 // @run-at       document-start
@@ -152,10 +152,14 @@
         .then((data) => {
           data = { ...data };
           if (response.url.indexOf("?sid=attackData") != -1) {
-            if (data.DB.error?.includes("in hospital")) {
+            if (data.DB.error?.includes("in hospital") || data.DB.error?.includes("in another country")) {
               if (localStorage.getItem("goCrazy_useAttackInHosp") === "true") {
                 if (data.DB.error?.includes("in hospital")) {
                   data.DB.defenderUser.playername += " [In Hospital]";
+                  delete data.DB.error;
+                  delete data.startErrorTitle;
+                } else if (data.DB.error?.includes("in another country")) {
+                  data.DB.defenderUser.playername += " [Travelling]";
                   delete data.DB.error;
                   delete data.startErrorTitle;
                 }
