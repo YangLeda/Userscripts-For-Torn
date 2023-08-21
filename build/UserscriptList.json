@@ -112,5 +112,13 @@
     "description": "Bounty页面自动填写金额",
     "detail": "代码第15行修改金额",
     "version": "1.0"
+  },
+  {
+    "path": "PokerHistory.js",
+    "name": "PokerHistory",
+    "author": "bot_7420[2937420]",
+    "description": "记录Poker牌局历史",
+    "detail": "记录Poker牌局历史",
+    "version": "1.0"
   }
 ]
