@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         ChatRecorder
 // @namespace    http://tampermonkey.net/
-// @version      2.4
-// @description  Saves chat history.
+// @version      2.5
+// @description  Saves all chat history.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/*
 // @run-at       document-start
@@ -164,21 +164,29 @@
   }
 
   function getTargetPlayerFromMessage(message) {
-    if (!message.roomId.startsWith("Users:")) {
+    if (message.roomId.startsWith("Poker:")) {
+      return { id: "Poker", name: "Poker" };
+    } else if (message.roomId.startsWith("Faction:")) {
+      return { id: "Faction", name: "Faction" };
+    } else if (message.roomId.startsWith("Company:")) {
+      return { id: "Company", name: "Company" };
+    } else if (message.roomId.startsWith("Global:")) {
+      return { id: "Global", name: "Global" };
+    } else if (!message.roomId.startsWith("Users:")) {
       return null;
     }
 
-    let target = { id: "others", name: "Other" };
+    // Private chats
     const selfId = getSelfIdFromSession();
     const selfName = getSelfNameFromSession();
     if (!selfId || !selfName) {
-      return target;
+      return { id: "others", name: "Other" };
     }
     const strList = message.roomId.split(";");
     if (strList.length !== 3) {
-      return target;
+      return { id: "others", name: "Other" };
     }
-
+    let target = { id: "others", name: "Other" };
     if (parseInt(strList[1]) === selfId) {
       target.id = strList[2];
     } else if (parseInt(strList[2]) === selfId) {
@@ -186,7 +194,6 @@
     } else {
       return { id: "others", name: "Other" };
     }
-
     if (strList[0].split(":")[1].split(",")[0] === selfName) {
       target.name = strList[0].split(":")[1].split(",")[1];
     } else if (strList[0].split(":")[1].split(",")[1] === selfName) {
@@ -194,7 +201,6 @@
     } else {
       return { id: "others", name: "Other" };
     }
-
     return target;
   }
 
@@ -372,7 +378,7 @@
 
   function addLabelToChat($chat) {
     const targetName = $chat.find("div._chat-box-head_1pskg_133 span._name_1pskg_148").text();
-    if (targetName === "Faction" || targetName === "Trade" || targetName === "Company" || targetName === "Global") {
+    if (targetName === "Faction" || targetName === "Trade" || targetName === "Company" || targetName === "Global" || targetName === "Poker") {
       return;
     }
 

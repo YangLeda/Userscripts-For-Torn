@@ -38,8 +38,8 @@
     "name": "ChatRecorder",
     "author": "bot_7420[2937420]",
     "description": "无限保存聊天记录",
-    "detail": "无限保存聊天记录",
-    "version": "2.4"
+    "detail": "无限保存聊天记录，包括Poker/Faction/Company/Global",
+    "version": "2.5"
   },
   {
     "path": "巴扎按堆叠总价排序.js",
