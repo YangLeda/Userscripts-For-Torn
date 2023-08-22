@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ChatRecorder
 // @namespace    http://tampermonkey.net/
-// @version      2.5
+// @version      2.6
 // @description  Saves all chat history.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/*
@@ -256,6 +256,11 @@
                     opacity: 0.7;
                     z-index: 900;
                     display: none;
+                  }
+
+                  div#chat-player-list {
+                    overflow-y: scroll;
+                    height: 50px;
                   }
 
                   a.chat-history-search:hover {
