@@ -120,5 +120,13 @@
     "description": "记录Poker牌局历史",
     "detail": "记录Poker牌局历史",
     "version": "1.0"
+  },
+  {
+    "path": "ShrinkImageInQuote.js",
+    "name": "ShrinkImageInQuote",
+    "author": "bot_7420[2937420]",
+    "description": "缩小论坛引用帖子中的图片",
+    "detail": "缩小论坛引用帖子中的图片，增加易读性",
+    "version": "1.0"
   }
 ]

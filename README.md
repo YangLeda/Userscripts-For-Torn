@@ -44,3 +44,6 @@ Bounty页面自动填写金额
 ## 15. [PokerHistory](userscripts/PokerHistory.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 记录Poker牌局历史
 >记录Poker牌局历史  
+## 16. [ShrinkImageInQuote](userscripts/ShrinkImageInQuote.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+缩小论坛引用帖子中的图片
+>缩小论坛引用帖子中的图片，增加易读性  
