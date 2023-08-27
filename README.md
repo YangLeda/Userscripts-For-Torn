@@ -11,7 +11,7 @@ bazaar自动填价（修复需要手动清空价格）
 ## 4. [显示RW奖励价值](userscripts/显示RW奖励价值.js) 1.2&emsp;&emsp;bot_7420[2937420] 
 RW结算页面显示所有奖励价值
 >RW结算页面显示所有奖励价值  
-## 5. [ChatRecorder](userscripts/ChatRecorder.js) 2.6&emsp;&emsp;bot_7420[2937420] 
+## 5. [ChatRecorder](userscripts/ChatRecorder.js) 2.7&emsp;&emsp;bot_7420[2937420] 
 无限保存聊天记录
 >无限保存聊天记录，包括Poker/Faction/Company/Global  
 ## 6. [巴扎按堆叠总价排序](userscripts/巴扎按堆叠总价排序.js) 1.0&emsp;&emsp;bot_7420[2937420] 

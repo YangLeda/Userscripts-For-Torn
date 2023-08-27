@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ChatRecorder
 // @namespace    http://tampermonkey.net/
-// @version      2.6
+// @version      2.7
 // @description  Saves all chat history.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/*
@@ -24,7 +24,7 @@
   const originalSend = WebSocket.prototype.send;
   window.sockets = [];
   WebSocket.prototype.send = function (...args) {
-    if (window.sockets.indexOf(this) === -1 && this.url.indexOf("ws-chat.torn") > -1) {
+    if (window.sockets.indexOf(this) === -1 && this.url.indexOf("ws-chat") > -1) {
       console.log("ChatRecorder: found chat websocket");
       window.sockets.push(this);
       this.addEventListener("message", function (event) {
