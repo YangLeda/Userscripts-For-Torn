@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         PokerHistory
 // @namespace    http://www.torn.com/
-// @version      1.0
+// @version      1.1
 // @description  Records all Poker history.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/loader.php?sid=holdem*
+// @run-at       document-body
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -12,13 +13,14 @@
   "use strict";
 
   let db = null;
+  let messageBoxObserver = null;
 
   initIndexDB();
 
   window.onload = function () {
     initCSS();
     initControlPanel();
-    initPokerBoxObserver();
+    initPokerObserver();
   };
 
   function initIndexDB() {
@@ -90,28 +92,47 @@
     });
   }
 
-  function initPokerBoxObserver() {
-    const $messageWrap = $("div.holdemWrapper___D71Gy div.messagesWrap___tBx9u"); // message___RlFXd
-    const observerConfig = { attributes: true, childList: true, subtree: false };
-    const observer = new MutationObserver((mutated) => {
-      handlePokerBoxChange(mutated);
+  function initPokerObserver() {
+    const $poker = $("div.holdemWrapper___D71Gy");
+    const observerConfig = { attributes: false, childList: true, subtree: false };
+    const observer = new MutationObserver(() => {
+      reObserveMessageBox();
     });
-    observer.observe($messageWrap[0], observerConfig);
+    if ($poker.length === 1) {
+      console.log("PokerHistory: observe poker page");
+      observer.observe($poker[0], observerConfig);
+      reObserveMessageBox();
+    }
   }
 
-  function handlePokerBoxChange(mutated) {
+  function reObserveMessageBox() {
+    console.log("PokerHistory: reObserveMessageBox");
+    if (!messageBoxObserver) {
+      messageBoxObserver = new MutationObserver((mutated) => {
+        handleMessageBoxChange(mutated);
+      });
+    }
+    messageBoxObserver.disconnect();
+    const $messageWrap = $("div.holdemWrapper___D71Gy div.messagesWrap___tBx9u");
+    const observerConfig = { attributes: true, childList: true, subtree: false };
+    messageBoxObserver.observe($messageWrap[0], observerConfig);
+  }
+
+  function handleMessageBoxChange(mutated) {
     if (mutated.length >= 40) {
-      console.log("PokerHistory: handlePokerBoxChange disregarded");
+      console.log("PokerHistory: handlePokerBoxChange disregarded " + mutated.length);
       return;
     }
 
     for (const mutation of mutated) {
       for (const node of mutation.addedNodes) {
-        let message = {
-          timestamp: new Date().getTime() / 1000,
-          text: node.innerText,
-        };
-        dbWrite(message);
+        if (node.classList.contains("message___RlFXd")) {
+          let message = {
+            timestamp: new Date().getTime() / 1000,
+            text: node.innerText,
+          };
+          dbWrite(message);
+        }
       }
     }
   }

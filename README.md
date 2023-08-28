@@ -41,7 +41,7 @@ PI取钱添加数个预设金额按钮；按空格存钱
 ## 14. [BountyPreset](userscripts/BountyPreset.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 Bounty页面自动填写金额
 >代码第15行修改金额  
-## 15. [PokerHistory](userscripts/PokerHistory.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+## 15. [PokerHistory](userscripts/PokerHistory.js) 1.1&emsp;&emsp;bot_7420[2937420] 
 记录Poker牌局历史
 >记录Poker牌局历史  
 ## 16. [ShrinkImageInQuote](userscripts/ShrinkImageInQuote.js) 1.0&emsp;&emsp;bot_7420[2937420] 
