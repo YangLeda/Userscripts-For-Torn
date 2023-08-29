@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         显示RW奖励价值
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Show value of RW rewards.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/war.php?step=rankreport*
@@ -87,10 +87,13 @@
         url: `https://api.torn.com/torn/${itemId}?selections=items&key=${API_KEY}`,
         method: "POST",
         synchronous: true,
-        onload: (response) => {
+        onload: async (response) => {
           if (response.status == 200) {
             const body = JSON.parse(response.responseText);
-            const marketValue = body.items[itemId].market_value;
+            let marketValue = body.items[itemId].market_value;
+            if (!marketValue || marketValue <= 0) {
+              marketValue = await valueCacheBazaar(itemId);
+            }
             marketValueMap.set(itemId, marketValue);
             resolve(marketValue);
           } else {
@@ -108,6 +111,38 @@
         },
         ontimeout: () => {
           console.error("RWAwardValue: valueCache API fetch ontimeout");
+          resolve(0);
+        },
+      });
+    });
+  }
+
+  function valueCacheBazaar(itemId) {
+    return new Promise((resolve, reject) => {
+      GM.xmlHttpRequest({
+        url: `https://api.torn.com/market/${itemId}?selections=bazaar&key=${API_KEY}`,
+        method: "POST",
+        synchronous: true,
+        onload: (response) => {
+          if (response.status == 200) {
+            const body = JSON.parse(response.responseText);
+            const bazaarValue = body.bazaar[0].cost;
+            resolve(bazaarValue);
+          } else {
+            console.error("RWAwardValue: valueCacheBazaar API fetch onload with HTTP status " + response.status);
+            resolve(0);
+          }
+        },
+        onabort: () => {
+          console.error("RWAwardValue: valueCacheBazaar API fetch onabort");
+          resolve(0);
+        },
+        onerror: () => {
+          console.error("RWAwardValue: valueCacheBazaar API fetch onerror");
+          resolve(0);
+        },
+        ontimeout: () => {
+          console.error("RWAwardValue: valueCacheBazaar API fetch ontimeout");
           resolve(0);
         },
       });

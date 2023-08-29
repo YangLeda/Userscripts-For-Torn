@@ -8,7 +8,7 @@ bazaar自动填价（修复需要手动清空价格）
 ## 3. [气泡美化聊天窗](userscripts/ChatBubbles.js) 2.1.0&emsp;&emsp;Pi77Bull[2082618], bot_7420[2937420] 
 气泡美化聊天窗（修复显示问题并兼容冰蛙）
 >气泡美化聊天窗  
-## 4. [显示RW奖励价值](userscripts/显示RW奖励价值.js) 1.2&emsp;&emsp;bot_7420[2937420] 
+## 4. [显示RW奖励价值](userscripts/显示RW奖励价值.js) 1.3&emsp;&emsp;bot_7420[2937420] 
 RW结算页面显示所有奖励价值
 >RW结算页面显示所有奖励价值  
 ## 5. [ChatRecorder](userscripts/ChatRecorder.js) 2.7&emsp;&emsp;bot_7420[2937420] 
