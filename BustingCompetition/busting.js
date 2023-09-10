@@ -3,9 +3,9 @@
 import { unlinkSync, writeFileSync } from "fs";
 import axios from "axios";
 
-const TO_FILE_PATH = "大逃杀.csv";
+const TO_FILE_PATH = "BUST大赛.csv";
 const API_KEY = "";
-const FACTION_ID_LIST = [20465, 36134, 16335, 10741, 16424, 27902, 11796, 9356, 8509];
+const FACTION_ID_LIST = [36134, 9356, 8509];
 const PROXY = {
   proxy: {
     protocol: "http",
@@ -13,15 +13,15 @@ const PROXY = {
     port: 7890,
   },
 };
+const TIMESTAMP_START = 1693756800; // 2023-09-4 00:00:00 Beijing Time
+const TIMESTAMP_END = 1696089600; // 2023-09-31 00:00:00 Beijing Time
 
 handle();
 
 async function handle() {
-  console.log("EliminationData start");
-
   let membersList = [];
   await fetchMemberList(membersList);
-  await fetchElimination(membersList);
+  await fetchBusting(membersList);
   const content = writeContent(membersList);
 
   try {
@@ -64,15 +64,18 @@ async function fetchFactionMemberList(factionId) {
   return list;
 }
 
-async function fetchElimination(membersList) {
+async function fetchBusting(membersList) {
   console.log("");
   let failedList = [];
 
   for (const member of membersList) {
-    let body = null;
+    let body1 = null;
+    let body2 = null;
     try {
-      const response = await axios.get(`https://api.torn.com/user/${member.id}?selections=&key=${API_KEY}`, PROXY);
-      body = response.data;
+      const response1 = await axios.get(`https://api.torn.com/user/${member.id}?selections=basic,personalstats&stat=peoplebusted&timestamp=${TIMESTAMP_START}&key=${API_KEY}`, PROXY);
+      const response2 = await axios.get(`https://api.torn.com/user/${member.id}?selections=basic,personalstats&stat=peoplebusted&timestamp=${TIMESTAMP_END}&key=${API_KEY}`, PROXY);
+      body1 = response1.data;
+      body2 = response2.data;
     } catch (error) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
@@ -80,50 +83,34 @@ async function fetchElimination(membersList) {
       continue;
     }
 
-    if (!body.player_id || parseInt(body.player_id) !== parseInt(member.id)) {
+    if (!body1.player_id || parseInt(body1.player_id) !== parseInt(member.id) || !body2.player_id || parseInt(body2.player_id) !== parseInt(member.id)) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
       process.stdout.write("Progress: " + member.id + " ERROR ID. Failed " + failedList.length);
       continue;
     }
 
-    if (!body.competition || body.competition.name !== "Elimination") {
-      failedList.push(member);
-      process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR json Elimination. Failed " + failedList.length);
-      continue;
-    }
+    const bustNum = body2.personalstats.peoplebusted - body1.personalstats.peoplebusted;
+    process.stdout.write("\r\x1b[K");
+    process.stdout.write("Progress: " + member.id + " [" + bustNum + "] " + failedList.length);
 
-    if (body.competition.team) {
-      process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " YES. Failed " + failedList.length);
-      member.elimination = {};
-      member.elimination.isJoined = true;
-      member.elimination.team = body.competition.team;
-      member.elimination.attacks = body.competition.attacks;
-      member.elimination.score = body.competition.score;
-    } else {
-      process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " NO. Failed " + failedList.length);
-      member.elimination = {};
-      member.elimination.isJoined = false;
-    }
+    member.bustNum = bustNum;
 
-    await sleep(300);
+    await sleep(500);
   }
 
   console.log("\nFailed size: " + failedList.length);
   if (failedList.length > 0) {
-    await fetchElimination(failedList);
+    await fetchBusting(failedList);
   }
 }
 
 function writeContent(membersList) {
   let content = "";
-  content += "ID,Name,Level,Faction,Team,Attacks,Score\n";
+  content += "ID,Name,Level,Faction,Bust\n";
 
   for (const member of membersList) {
-    if (member.elimination && member.elimination.isJoined === true) {
+    if (member.bustNum > 0) {
       content += member.id;
       content += ",";
       content += member.name;
@@ -132,11 +119,7 @@ function writeContent(membersList) {
       content += ",";
       content += member.factionTag;
       content += ",";
-      content += member.elimination.team;
-      content += ",";
-      content += member.elimination.attacks;
-      content += ",";
-      content += member.elimination.score;
+      content += member.bustNum;
       content += "\n";
     }
   }
