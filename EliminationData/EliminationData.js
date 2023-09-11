@@ -130,6 +130,9 @@ async function fetchElimination(membersList) {
       process.stdout.write("Progress: " + member.id + " [No] " + failedList.length);
       member.elimination = {};
       member.elimination.isJoined = false;
+      member.elimination.team = "";
+      member.elimination.attacks = 0;
+      member.elimination.score = 0;
     }
 
     await sleep(500);
