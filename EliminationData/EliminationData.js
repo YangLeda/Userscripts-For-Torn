@@ -1,6 +1,6 @@
 "use strict";
 
-import { writeFileSync } from "fs";
+import { unlinkSync, writeFileSync } from "fs";
 import axios from "axios";
 import { convertCsvToXlsx } from "@aternus/csv-to-xlsx";
 import "dotenv/config";
