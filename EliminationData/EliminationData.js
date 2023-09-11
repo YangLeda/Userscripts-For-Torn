@@ -39,6 +39,11 @@ async function handle() {
   } catch (error) {}
 
   try {
+    unlinkSync(fileName + ".xlsx");
+    console.log("xlsx file deleted");
+  } catch (error) {}
+
+  try {
     writeFileSync(fileName + ".csv", content, { flag: "a" });
   } catch (error) {
     console.log(error);
