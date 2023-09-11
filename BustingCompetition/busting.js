@@ -34,6 +34,11 @@ async function handle() {
   let fileName = "BUST大赛" + mm + dd;
 
   try {
+    unlinkSync(fileName + ".csv");
+    console.log("csv file deleted");
+  } catch (error) {}
+
+  try {
     writeFileSync(fileName + ".csv", content, { flag: "a" });
   } catch (error) {
     console.log(error);
