@@ -2,6 +2,7 @@
 
 import { writeFileSync } from "fs";
 import axios from "axios";
+import { convertCsvToXlsx } from "@aternus/csv-to-xlsx";
 import "dotenv/config";
 
 const API_KEY = process.env.API_KEY;
