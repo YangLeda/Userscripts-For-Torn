@@ -92,14 +92,14 @@ async function fetchBusting(membersList) {
     } catch (error) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR fetch. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [ERROR fetch] " + failedList.length);
       continue;
     }
 
     if (!body1.player_id || parseInt(body1.player_id) !== parseInt(member.id) || !body2.player_id || parseInt(body2.player_id) !== parseInt(member.id)) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR ID. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [ERROR json ID] " + failedList.length);
       continue;
     }
 
@@ -109,7 +109,7 @@ async function fetchBusting(membersList) {
 
     member.bustNum = bustNum;
 
-    await sleep(800);
+    await sleep(1000);
   }
 
   console.log("\nFailed size: " + failedList.length);

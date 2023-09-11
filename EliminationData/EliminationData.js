@@ -121,7 +121,7 @@ async function fetchElimination(membersList) {
       member.elimination.isJoined = false;
     }
 
-    await sleep(300);
+    await sleep(500);
   }
 
   console.log("\nFailed size: " + failedList.length);
