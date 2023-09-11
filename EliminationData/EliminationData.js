@@ -1,10 +1,10 @@
 "use strict";
 
-import { unlinkSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import axios from "axios";
+import "dotenv/config";
 
-const TO_FILE_PATH = "大逃杀.csv";
-const API_KEY = "";
+const API_KEY = process.env.API_KEY;
 const FACTION_ID_LIST = [20465, 36134, 16335, 10741, 16424, 27902, 11796, 9356, 8509];
 const PROXY = {
   proxy: {
@@ -17,25 +17,37 @@ const PROXY = {
 handle();
 
 async function handle() {
-  console.log("EliminationData start");
-
   let membersList = [];
   await fetchMemberList(membersList);
   await fetchElimination(membersList);
+
+  membersList.sort((a, b) => {
+    return b.elimination.attacks - a.elimination.attacks;
+  });
+
   const content = writeContent(membersList);
 
-  try {
-    unlinkSync(TO_FILE_PATH);
-    console.log("existing file deleted");
-  } catch (error) {}
+  let today = new Date();
+  let dd = today.getDate();
+  let mm = today.getMonth() + 1;
+  let fileName = "大逃杀" + mm + dd;
 
   try {
-    writeFileSync(TO_FILE_PATH, content, { flag: "a" });
+    writeFileSync(fileName + ".csv", content, { flag: "a" });
   } catch (error) {
     console.log(error);
   }
 
-  console.log("EliminationData end");
+  try {
+    convertCsvToXlsx(fileName + ".csv", fileName + ".xlsx");
+  } catch (error) {
+    console.log(error);
+  }
+
+  try {
+    unlinkSync(fileName + ".csv");
+    console.log("csv file deleted");
+  } catch (error) {}
 }
 
 async function fetchMemberList(membersList) {
@@ -76,27 +88,27 @@ async function fetchElimination(membersList) {
     } catch (error) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR fetch. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [ERROR fetch] " + failedList.length);
       continue;
     }
 
     if (!body.player_id || parseInt(body.player_id) !== parseInt(member.id)) {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR ID. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [ERROR json ID] " + failedList.length);
       continue;
     }
 
     if (!body.competition || body.competition.name !== "Elimination") {
       failedList.push(member);
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " ERROR json Elimination. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [ERROR json Elimination] " + failedList.length);
       continue;
     }
 
     if (body.competition.team) {
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " YES. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [YES] " + failedList.length);
       member.elimination = {};
       member.elimination.isJoined = true;
       member.elimination.team = body.competition.team;
@@ -104,7 +116,7 @@ async function fetchElimination(membersList) {
       member.elimination.score = body.competition.score;
     } else {
       process.stdout.write("\r\x1b[K");
-      process.stdout.write("Progress: " + member.id + " NO. Failed " + failedList.length);
+      process.stdout.write("Progress: " + member.id + " [No] " + failedList.length);
       member.elimination = {};
       member.elimination.isJoined = false;
     }

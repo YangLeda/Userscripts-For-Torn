@@ -1,10 +1,11 @@
 "use strict";
 
-import { unlinkSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import axios from "axios";
+import { convertCsvToXlsx } from "@aternus/csv-to-xlsx";
+import "dotenv/config";
 
-const TO_FILE_PATH = "BUST大赛.csv";
-const API_KEY = "";
+const API_KEY = process.env.API_KEY;
 const FACTION_ID_LIST = [36134, 9356, 8509];
 const PROXY = {
   proxy: {
@@ -22,20 +23,32 @@ async function handle() {
   let membersList = [];
   await fetchMemberList(membersList);
   await fetchBusting(membersList);
+  membersList.sort((a, b) => {
+    return b.bustNum - a.bustNum;
+  });
   const content = writeContent(membersList);
 
-  try {
-    unlinkSync(TO_FILE_PATH);
-    console.log("existing file deleted");
-  } catch (error) {}
+  let today = new Date();
+  let dd = today.getDate();
+  let mm = today.getMonth() + 1;
+  let fileName = "BUST大赛" + mm + dd;
 
   try {
-    writeFileSync(TO_FILE_PATH, content, { flag: "a" });
+    writeFileSync(fileName + ".csv", content, { flag: "a" });
   } catch (error) {
     console.log(error);
   }
 
-  console.log("EliminationData end");
+  try {
+    convertCsvToXlsx(fileName + ".csv", fileName + ".xlsx");
+  } catch (error) {
+    console.log(error);
+  }
+
+  try {
+    unlinkSync(fileName + ".csv");
+    console.log("csv file deleted");
+  } catch (error) {}
 }
 
 async function fetchMemberList(membersList) {
@@ -96,7 +109,7 @@ async function fetchBusting(membersList) {
 
     member.bustNum = bustNum;
 
-    await sleep(500);
+    await sleep(800);
   }
 
   console.log("\nFailed size: " + failedList.length);
