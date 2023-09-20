@@ -17,6 +17,8 @@ const PROXY = {
 const TIMESTAMP_START = 1693756800; // 2023-09-4 00:00:00 Beijing Time
 const TIMESTAMP_END = 1696089600; // 2023-09-31 00:00:00 Beijing Time
 
+let scoreMap = new Map();
+
 handle();
 
 async function handle() {
@@ -73,6 +75,8 @@ async function fetchFactionMemberList(factionId) {
   const body = response.data;
 
   const factionTag = body.tag;
+  scoreMap.set(factionTag, 0);
+
   let list = [];
   for (const key of Object.keys(body.members)) {
     let member = {};
@@ -119,7 +123,7 @@ async function fetchBusting(membersList) {
 
     member.bustNum = bustNum;
 
-    await sleep(1000);
+    await sleep(800);
   }
 
   console.log("\nFailed size: " + failedList.length);
@@ -130,7 +134,18 @@ async function fetchBusting(membersList) {
 
 function writeContent(membersList) {
   let content = "";
-  content += "ID,Name,Level,Faction,Bust\n";
+  content += "ID,Name,Level,Faction,Bust,Score\n";
+
+  let score = 50;
+  for (const member of membersList) {
+    if (member.bustNum > 0) {
+      member.score = score;
+      scoreMap.set(member.factionTag, scoreMap.get(member.factionTag) + score);
+    }
+    if (score > 0) {
+      score--;
+    }
+  }
 
   for (const member of membersList) {
     if (member.bustNum > 0) {
@@ -143,9 +158,28 @@ function writeContent(membersList) {
       content += member.factionTag;
       content += ",";
       content += member.bustNum;
+      content += ",";
+      content += member.score;
       content += "\n";
     }
   }
+
+  content += ",,,,,\n";
+  scoreMap.forEach((value, key) => {
+    content += "";
+    content += ",";
+    content += "";
+    content += ",";
+    content += "";
+    content += ",";
+    content += key;
+    content += ",";
+    content += "";
+    content += ",";
+    content += value;
+    content += "\n";
+  });
+
   return content;
 }
 
