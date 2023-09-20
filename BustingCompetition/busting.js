@@ -147,6 +147,22 @@ function writeContent(membersList) {
     }
   }
 
+  scoreMap.forEach((value, key) => {
+    content += "";
+    content += ",";
+    content += "";
+    content += ",";
+    content += "";
+    content += ",";
+    content += key;
+    content += ",";
+    content += "";
+    content += ",";
+    content += value;
+    content += "\n";
+  });
+  content += ",,,,,\n";
+
   for (const member of membersList) {
     if (member.bustNum > 0) {
       content += member.id;
@@ -163,22 +179,6 @@ function writeContent(membersList) {
       content += "\n";
     }
   }
-
-  content += ",,,,,\n";
-  scoreMap.forEach((value, key) => {
-    content += "";
-    content += ",";
-    content += "";
-    content += ",";
-    content += "";
-    content += ",";
-    content += key;
-    content += ",";
-    content += "";
-    content += ",";
-    content += value;
-    content += "\n";
-  });
 
   return content;
 }
