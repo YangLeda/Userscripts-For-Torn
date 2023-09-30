@@ -47,3 +47,6 @@ Bounty页面自动填写金额
 ## 16. [ShrinkImageInQuote](userscripts/ShrinkImageInQuote.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 缩小论坛引用帖子中的图片
 >缩小论坛引用帖子中的图片，增加易读性  
+## 17. [ItemMarketPin](userscripts/ItemMarketPin.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+市场分类栏置顶部分分类
+>市场分类栏置顶部分分类  

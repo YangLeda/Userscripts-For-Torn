@@ -128,5 +128,13 @@
     "description": "缩小论坛引用帖子中的图片",
     "detail": "缩小论坛引用帖子中的图片，增加易读性",
     "version": "1.0"
+  },
+  {
+    "path": "ItemMarketPin.js",
+    "name": "ItemMarketPin",
+    "author": "bot_7420[2937420]",
+    "description": "市场分类栏置顶部分分类",
+    "detail": "市场分类栏置顶部分分类",
+    "version": "1.0"
   }
 ]

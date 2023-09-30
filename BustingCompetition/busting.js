@@ -123,7 +123,7 @@ async function fetchBusting(membersList) {
 
     member.bustNum = bustNum;
 
-    await sleep(800);
+    await sleep(500);
   }
 
   console.log("\nFailed size: " + failedList.length);
