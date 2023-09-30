@@ -136,5 +136,13 @@
     "description": "市场分类栏置顶部分分类",
     "detail": "市场分类栏置顶部分分类",
     "version": "1.0"
+  },
+  {
+    "path": "NoPageRefreshWhenHosped.js",
+    "name": "NoPageRefreshWhenHosped",
+    "author": "bot_7420[2937420]",
+    "description": "禁止入院时公司等页面自动刷新",
+    "detail": "禁止入院时公司等页面自动刷新",
+    "version": "1.0"
   }
 ]

@@ -50,3 +50,6 @@ Bounty页面自动填写金额
 ## 17. [ItemMarketPin](userscripts/ItemMarketPin.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 市场分类栏置顶部分分类
 >市场分类栏置顶部分分类  
+## 18. [NoPageRefreshWhenHosped](userscripts/NoPageRefreshWhenHosped.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+禁止入院时公司等页面自动刷新
+>禁止入院时公司等页面自动刷新  
