@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Quick Travel
 // @namespace    http://www.torn.com/
-// @version      1.0
+// @version      1.1
 // @description  Focus on default travel destination, focus on start travel button, and focus on confirmation button. Use Enter or Space to press the buttons.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/travelagency.php
