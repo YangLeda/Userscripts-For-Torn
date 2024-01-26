@@ -258,7 +258,7 @@ async function fetchEmployee(membersList) {
 
       process.stdout.write("\r\x1b[K");
       process.stdout.write("Progress: " + employee.id + "[SUCCESS] " + failedList.length);
-      employeeWSList.push(parseInt(60 * body.age + 75 * body.personalstats.trainsreceived));
+      employeeWSList.push(parseInt(70 * body.age + 75 * body.personalstats.trainsreceived));
 
       await sleep(300);
     }
@@ -270,7 +270,7 @@ async function fetchEmployee(membersList) {
       employeeWSList.forEach(ws => {
         total += ws;
       });
-      member.company.averageWS = parseInt(total / employeeWSList.length);
+      member.company.averageWS = parseInt(total / employeeWSList.length - 1);
     }
   }
 
@@ -282,7 +282,7 @@ async function fetchEmployee(membersList) {
 
 function writeContent(membersList) {
   let content = "";
-  content += "玩家,帮派,公司类型,星级,员工数,日收入,周收入,去除每个员工工资2M后日收入,超一天不上线员工数,员工最高ws,员工最低ws,员工平均ws\n";
+  content += "玩家,帮派,公司类型,星级,员工数,日收入,周收入,去除2M工资后平均日收入,超一天不上线员工数,员工最高ws,员工最低ws,员工平均ws\n";
 
   for (const member of membersList) {
     if (member.company && member.company.company_id) {
@@ -300,7 +300,7 @@ function writeContent(membersList) {
       content += ",";
       content += member.company.weekly_income;
       content += ",";
-      content += parseInt(member.company.daily_income - member.company.employees_hired * 2000000);
+      content += parseInt(member.company.weekly_income / 7 - member.company.employees_hired * 2000000);
       content += ",";
       content += member.company.inactiveEmployeeNum;
       content += ",";
