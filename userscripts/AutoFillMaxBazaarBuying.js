@@ -15,7 +15,6 @@
   console.log("Auto Fill Max Bazaar Buying");
 
   const observer = new MutationObserver((mutationList) => {
-
     for (const mutation of mutationList) {
       for (const elem of mutation.addedNodes) {
         if (elem.classList && elem.classList.contains("tt-max-buy")) {
