@@ -1,14 +1,12 @@
 // ==UserScript==
 // @name         Chat2.0Recorder
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Saves chat history. For Chat 2.0.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/*
 // @run-at       document-start
 // @grant        GM_addStyle
-// @downloadURL https://update.greasyfork.org/scripts/488074/Chat20Recorder.user.js
-// @updateURL https://update.greasyfork.org/scripts/488074/Chat20Recorder.meta.js
 // ==/UserScript==
 
 (function () {
@@ -22,26 +20,18 @@
     };
 
     // Hook fetch chat
-    const { fetch: originalFetch } = unsafeWindow;
+    const originalFetch = unsafeWindow.fetch;
     unsafeWindow.fetch = async (...args) => {
         let [resource, config] = args;
         let response = await originalFetch(resource, config);
-        const json = () =>
-            response
-                .clone()
-                .json()
-                .then((data) => {
-                    data = { ...data };
-                    if (response.url.indexOf("sendbird.com/v3/group_channels/") != -1 && response.url.indexOf("/messages?") != -1) {
-                        if (Array.isArray(data.messages)) {
-                            // console.log(data.messages);
-                            dbWriteArray(data.messages);
-                        }
-                    }
-                    return data;
-                });
-        response.json = json;
-        response.text = async () => JSON.stringify(await json());
+        if (response.url.indexOf("sendbird.com/v3/group_channels/") != -1 && response.url.indexOf("/messages?") != -1) {
+            response.clone().json().then((data) => {
+                if (Array.isArray(data.messages)) {
+                    // console.log(data.messages);
+                    dbWriteArray(data.messages);
+                }
+            });
+        }
         return response;
     };
 
@@ -97,7 +87,6 @@
         }
 
         let msg = {};
-
         const targetPlayer = getTargetPlayerFromMessage(message);
         if (!targetPlayer) {
             return;
@@ -109,6 +98,7 @@
         msg.timestamp = message.ts;
         msg.messageText = message.message;
         msg.messageId = message.msg_id;
+        // console.log(msg);
 
         const transaction = db.transaction(["messageStore"], "readwrite");
         transaction.oncomplete = (event) => { };
@@ -156,9 +146,7 @@
         }
 
         const transaction = db.transaction(["messageStore"], "readonly");
-        transaction.oncomplete = (event) => {
-            console.log("ChatRecorder: dbReadByTargetPlayerId transaction oncomplete [" + targetPlayerId + "]");
-        };
+        transaction.oncomplete = (event) => { };
         transaction.onerror = (event) => {
             console.error("ChatRecorder: dbReadByTargetPlayerId transaction onerror [" + targetPlayerId + "]");
         };
@@ -190,9 +178,7 @@
         }
 
         const transaction = db.transaction(["messageStore"], "readonly");
-        transaction.oncomplete = (event) => {
-            console.log("ChatRecorder: dbReadAllPlayerId transaction oncomplete");
-        };
+        transaction.oncomplete = (event) => { };
         transaction.onerror = (event) => {
             console.error("ChatRecorder: dbReadAllPlayerId transaction onerror");
         };
@@ -320,7 +306,7 @@
     function initControlPanel() {
         const $title = $("div#top-page-links-list");
         if ($title.length === 0) {
-            console.log("ChatRecorder: nowhere to put control panel button");
+            console.error("ChatRecorder: nowhere to put control panel button");
         }
         const $controlBtn = $(`<a id="chatHistoryControl" class="t-clear h c-pointer right last">
                                   <span class="icon-wrap svg-icon-wrap">
