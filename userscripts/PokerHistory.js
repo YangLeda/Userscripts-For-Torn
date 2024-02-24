@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         PokerHistory
 // @namespace    http://www.torn.com/
-// @version      1.1
+// @version      1.2
 // @description  Records all Poker history.
 // @author       bot_7420 [2937420]
-// @match        https://www.torn.com/loader.php?sid=holdem*
+// @match        https://www.torn.com/page.php?sid=holdem*
 // @run-at       document-body
 // @grant        GM_addStyle
 // ==/UserScript==
@@ -149,16 +149,16 @@
                         z-index: 1000;
                         display: none;
                       }
-    
+
                       .poker-control-panel-results {
                         padding: 10px;
                       }
-    
+
                       .poker-control-player {
                         margin: 4px 4px 4px 4px !important;
                         display: inline-block !important;
                       }
-    
+
                       .poker-control-panel-overlay {
                         position: fixed;
                         top: 0;
@@ -170,7 +170,7 @@
                         z-index: 900;
                         display: none;
                       }
-    
+
                       .poker-control-panel-item {
                         display: inline-block;
                         margin: 2px 2px 2px 2px;
