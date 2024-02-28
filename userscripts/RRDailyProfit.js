@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RRDailyProfit
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Shows Russian Roulette total profit of the current UTC day.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/page.php?sid=russianRoulette*
@@ -50,7 +50,7 @@
     $controlBtn.css("color", "grey");
 
     const now = new Date();
-    const startOfDay = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const startOfDay = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
     const startOfDayTimestamp = startOfDay / 1000;
 
     const winLogs = await fetchRRWinLogs(startOfDayTimestamp);
