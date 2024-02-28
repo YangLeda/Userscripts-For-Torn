@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RRDailyProfit
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Shows Russian Roulette total profit of the current UTC day.
 // @author       bot_7420 [2937420]
 // @match        https://www.torn.com/page.php?sid=russianRoulette*
@@ -23,9 +23,9 @@
   function initControlButton() {
     const $title = $("div.linksContainer___LiOTN");
     if ($title.length === 0) {
-      console.log("ChatRecorder: nowhere to put control panel button");
+      console.log("RRDailyProfit: nowhere to put control panel button");
     }
-    $controlBtn = $(`<a id="chatHistoryControl" class="linkContainer___X16y4 inRow___VfDnd greyLineV___up8VP link-container-LastRolls" style="font-weight:Bold;">RRDailyProfit</a>`);
+    $controlBtn = $(`<a class="linkContainer___X16y4 inRow___VfDnd greyLineV___up8VP link-container-LastRolls" style="font-weight:Bold;">RRDailyProfit</a>`);
 
     const record = localStorage.getItem("Script_RRDailyProfit_record");
     const recordTimestamp = localStorage.getItem("Script_RRDailyProfit_recordTimestamp");
