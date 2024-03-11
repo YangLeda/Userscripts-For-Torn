@@ -1,12 +1,11 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  None
 // @author       bot_7420
 // @match        https://www.simcompanies.com/*
 // @grant        GM_addStyle
-// @grant        GM_setClipboard
 // @run-at       document-start
 // ==/UserScript==
 
@@ -53,7 +52,72 @@
             !currentURL.includes("/warehouse/research/")
         ) {
             handleWarehouseItem();
+        } else if (currentURL.includes("/b/")) {
+            handleCustomHourInput();
         }
+    }
+
+    function setInput(inputNode, value) {
+        let lastValue = inputNode.value;
+        inputNode.value = value;
+        let event = new Event("input", { bubbles: true });
+        event.simulated = true;
+        if (inputNode._valueTracker) inputNode._valueTracker.setValue(lastValue);
+        inputNode.dispatchEvent(event);
+    }
+
+    function handleCustomHourInput() {
+        console.log("SimCompanies-Torn: handleCustomHourInput");
+        const checkElementExist = () => {
+            const selectedElems = document.querySelectorAll("h3 > svg");
+            let isReady = selectedElems.length > 0;
+            if (isReady) {
+                selectedElems.forEach((node) => {
+                    isReady = isReady && node?.parentElement?.parentElement?.querySelector("div > button")?.parentElement;
+                });
+            }
+            if (isReady) {
+                clearInterval(timer);
+                selectedElems.forEach((node) => {
+                    let targetNode = node.parentElement.parentElement.querySelector("div > button").parentElement;
+
+                    let newNode = document.createElement("button");
+                    newNode.className = "script_custom_hour_button";
+                    Object.assign(newNode, { type: "button", role: "button" });
+                    newNode.onclick = (e) => {
+                        let target_node = e.target.parentElement.parentElement.querySelector("input");
+                        let target_text = e.target.innerText;
+                        console.log(target_node);
+                        console.log(target_text);
+                        target_node.click();
+                        setInput(target_node, target_text);
+                        e.preventDefault();
+                    };
+                    let commonClass = targetNode.querySelector("button").className;
+                    newNode.className += ` ${commonClass}`;
+                    newNode.innerText = "12hr";
+                    targetNode.prepend(newNode);
+
+                    let newNode2 = document.createElement("button");
+                    newNode2.className = "script_custom_hour_button";
+                    Object.assign(newNode2, { type: "button", role: "button" });
+                    newNode2.onclick = (e) => {
+                        let target_node = e.target.parentElement.parentElement.querySelector("input");
+                        let target_text = e.target.innerText;
+                        console.log(target_node);
+                        console.log(target_text);
+                        target_node.click();
+                        setInput(target_node, target_text);
+                        e.preventDefault();
+                    };
+                    let commonClass2 = targetNode.querySelector("button").className;
+                    newNode2.className += ` ${commonClass2}`;
+                    newNode2.innerText = "6hr";
+                    targetNode.prepend(newNode2);
+                });
+            }
+        };
+        let timer = setInterval(checkElementExist, 100);
     }
 
     function handleWarehouseItem() {
@@ -67,13 +131,13 @@
                 let price = exchangePrice * 0.97;
                 price = price.toFixed(3);
                 input.classList.add("script_checked");
+                setInput(input, price);
 
                 let elem = document.createElement("a");
-                let linkText = document.createTextNode("MP-3% = $" + price + " 点击复制到剪贴板");
+                let linkText = document.createTextNode("MP-3% = $" + price);
                 elem.appendChild(linkText);
                 elem.onclick = () => {
-                    console.log("SimCompanies-Torn: GM_setClipboard");
-                    GM_setClipboard(price, "text");
+                    setInput(input, price);
                 };
                 input.parentNode.insertBefore(elem, input.nextSibling);
             }
@@ -125,11 +189,11 @@
 
         // 交易所 左右栏比例1:1
         GM_addStyle(`
-        .col-sm-4 {
+        div.css-fbokx6.container .col-sm-4 {
             width: 50% !important;
         }`);
         GM_addStyle(`
-        .col-sm-8 {
+        div.css-fbokx6.container .col-sm-8 {
             width: 50% !important;
         }`);
 
