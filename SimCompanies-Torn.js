@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  None
 // @author       bot_7420
 // @match        https://www.simcompanies.com/*
@@ -127,19 +127,37 @@
             const input = document.querySelector(`input[name="price"]`);
             if (table && input && !input.classList.contains("script_checked")) {
                 console.log("SimCompanies-Torn: handleWarehouseItem check number");
-                const exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent);
-                let price = exchangePrice * 0.97;
-                price = price.toFixed(3);
+                let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent);
+                let discountedPrice = exchangePrice * 0.97;
+                exchangePrice = exchangePrice.toFixed(3);
+                discountedPrice = discountedPrice.toFixed(3);
                 input.classList.add("script_checked");
-                setInput(input, price);
 
                 let elem = document.createElement("a");
-                let linkText = document.createTextNode("MP-3% = $" + price);
+                let linkText = document.createTextNode("MP = $" + exchangePrice);
                 elem.appendChild(linkText);
                 elem.onclick = () => {
-                    setInput(input, price);
+                    setInput(input, exchangePrice);
                 };
+                elem.style.display = "block";
                 input.parentNode.insertBefore(elem, input.nextSibling);
+
+                let elem2 = document.createElement("a");
+                let linkText2 = document.createTextNode("MP-3% = $" + discountedPrice);
+                elem2.appendChild(linkText2);
+                elem2.onclick = () => {
+                    setInput(input, discountedPrice);
+                };
+                elem2.style.display = "block";
+                elem.parentNode.insertBefore(elem2, elem.nextSibling);
+
+                if (document.querySelector(`h3.css-bi2xxi.e1bf4c272`).innerText === "收件方") {
+                    setInput(input, discountedPrice);
+                    elem2.style.background = "#FFC107";
+                } else {
+                    setInput(input, exchangePrice);
+                    elem.style.background = "#FFC107";
+                }
             }
         };
         const tempTimer = setInterval(checkElementExist, 500);
