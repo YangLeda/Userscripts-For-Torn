@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  None
 // @author       bot_7420
 // @match        https://www.simcompanies.com/*
@@ -157,9 +157,23 @@
                 landscape_highlightIdleBuildings();
                 const tempTimer = setInterval(landscape_highlightIdleBuildings, 2000);
                 pageSpecifiedTimersList.push(tempTimer);
+                // 移动收菜图标至右上角
+                landscape_moveGatheringIcons();
+                const tempTimer2 = setInterval(landscape_moveGatheringIcons, 2000);
+                pageSpecifiedTimersList.push(tempTimer2);
             }
         };
         let timer = setInterval(checkElementExist, 100);
+    }
+
+    function landscape_moveGatheringIcons() {
+        console.log("SimCompanies-Torn: landscape_moveGatheringIcons");
+        const icons = document.querySelectorAll("img.css-hqao0z.ejaaut33");
+        for (const icon of icons) {
+            if (!icon.classList.contains("script_moved_to_top_right")) {
+                icon.classList.add("script_moved_to_top_right");
+            }
+        }
     }
 
     function landscape_removeRush() {
@@ -181,6 +195,30 @@
     }
 
     function global_addCSS() {
+        // 百科 宽屏
+        GM_addStyle(`
+        div.container.css-q9fi5t.ef8ljhx0 {
+            width: 100% !important;
+        }`);
+
+        // 百科 左右栏比例1:1
+        GM_addStyle(`
+        div.container.css-q9fi5t.ef8ljhx0 .col-md-4 {
+            width: 50% !important;
+        }`);
+        GM_addStyle(`
+        div.container.css-q9fi5t.ef8ljhx0 .col-md-8 {
+            width: 50% !important;
+        }`);
+
+        // 百科 左侧栏减少空白
+        GM_addStyle(`
+        div.css-1pbe8e5 div.col-xs-3.css-d2zl4q{
+            width: 63px !important;
+            padding-right: 2px !important;
+            padding-left: 2px !important;
+        }`);
+
         // 交易所 宽屏
         GM_addStyle(`
         .css-fbokx6 {
@@ -241,6 +279,14 @@
             -ms-transform: translateY(-50%);
             transform: translateY(-50%);
             color: rgb(184,184,184);
+        }`);
+
+        // 收菜图标移至右上角
+        GM_addStyle(`
+        .script_moved_to_top_right {
+            position:fixed !important;
+            top:6% !important;
+            border:1px solid black !important;
         }`);
     }
 
