@@ -1,11 +1,15 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  None
 // @author       bot_7420
 // @match        https://www.simcompanies.com/*
+// @require      https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.0/chart.umd.js
+// @require      https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js
 // @grant        GM_addStyle
+// @grant        GM_xmlhttpRequest
+// @connect      simcotools.app
 // @run-at       document-start
 // ==/UserScript==
 
@@ -13,7 +17,7 @@
     "use strict";
 
     // 交易所页面自定义输入价格
-    const CustomExchangeInputPrices = [10, 100, 1000, 10000];
+    const CustomExchangeInputPrices = [3840, 2880, 60];
 
     let pageSpecifiedTimersList = [];
     let notesElement = null;
@@ -63,7 +67,170 @@
             handleExchangeHighlightRecent();
             // 交易所 自定义输入价格
             handleExchangeCustomInputPrices();
+        } else if (currentURL.includes("/company/0/") || currentURL.includes("/company/1/")) {
+            // 公司资料页
+            handleProfilePage();
         }
+    }
+
+    async function handleSimcoToolsAPI() {
+        const checkElementExist = () => {
+            const selectedElem = document.querySelector(`input.css-1whp23o.form-control[name="quantity"]`);
+            if (selectedElem) {
+                clearInterval(timer);
+                const parent = document.querySelector(`div.css-10klw3m.col-sm-8.col-xs-12`);
+                let container = document.querySelector(`div#script_market_container`);
+                if (!container) {
+                    container = document.createElement("div");
+                    container.id = "script_market_container";
+                    parent.insertBefore(container, parent.firstChild);
+                } else {
+                    container.innerHTML = "";
+                }
+
+                let realm = 0;
+                if (document.querySelector(`div.css-inxa61.e1uuitfi4 img[alt*="企业家"]`)) {
+                    realm = 1;
+                }
+                const array = window.location.href.split("/");
+                let itemId = array[array.length - 2];
+                console.log("SimCompanies-Torn: handleSimcoToolsAPI " + realm + itemId);
+
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}`,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (response) {
+                        const json = JSON.parse(response.response);
+                        const p = document.createElement("p");
+                        let text =
+                            "当前: $" +
+                            json.latest_price.toFixed(3) +
+                            "&nbsp;&nbsp;&nbsp;日均: $" +
+                            json.prices_resume.average.toFixed(3) +
+                            "&nbsp;&nbsp;&nbsp;日最高: $" +
+                            json.prices_resume.max.toFixed(3) +
+                            "&nbsp;&nbsp;&nbsp;日最低: $" +
+                            json.prices_resume.min.toFixed(3);
+                        p.innerHTML = text;
+                        p.style.fontSize = "18px";
+                        container.insertBefore(p, container.firstChild);
+                    },
+                });
+
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (response) {
+                        const json = JSON.parse(response.response);
+                        const div = document.createElement("div");
+                        div.style.width = "100%";
+                        div.style.height = "260px";
+                        const canvas = document.createElement("canvas");
+                        canvas.id = "script_market_canvas";
+                        div.appendChild(canvas);
+                        container.appendChild(div);
+                        new Chart(canvas, {
+                            type: "line",
+                            data: {
+                                datasets: [
+                                    {
+                                        data: json.history,
+                                        pointRadius: 0,
+                                    },
+                                ],
+                            },
+                            options: {
+                                parsing: {
+                                    xAxisKey: "date",
+                                    yAxisKey: "average",
+                                },
+                                scales: {
+                                    x: {
+                                        type: "time",
+                                        time: {
+                                            unit: "day",
+                                            tooltipFormat: "yyyy-MM-dd",
+                                            displayFormats: {
+                                                day: "MM-dd",
+                                            },
+                                        },
+                                    },
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: false,
+                                    },
+                                },
+                            },
+                        });
+                    },
+                });
+            }
+        };
+        let timer = setInterval(checkElementExist, 100);
+    }
+
+    function handleProfilePage() {
+        const checkElementExist = () => {
+            const selectedElems = document.querySelectorAll(`div.css-1156ixp.e1addz3e7 div.css-7ip5xj.e1addz3e6 div`);
+            if (selectedElems.length > 10) {
+                clearInterval(timer);
+                let list = [];
+                for (const elem of selectedElems) {
+                    if (elem.querySelector(`span`)) {
+                        list.push(elem.querySelector(`span`).querySelector(`span`).innerText);
+                    }
+                }
+                const map = list.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+                const sortedMap = new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
+                let totalBuildingNum = 0;
+                map.forEach((value) => {
+                    totalBuildingNum += value;
+                });
+                let totalBuildingLevel = Number(document.querySelectorAll(`table.css-n6qpdi.et7yomk6`)[2].querySelectorAll(`tr`)[1].querySelectorAll(`td`)[1].innerHTML.replace(",", "")) / 100;
+                let averageBuildingLevel = (totalBuildingLevel / totalBuildingNum).toFixed(1);
+
+                const container = document.createElement("div");
+                const div = document.createElement("div");
+                const span = document.createElement("span");
+                span.innerHTML = "[建筑总数量: " + totalBuildingNum + "]   [总建筑等级: " + totalBuildingLevel + "]   [平均建筑等级: " + averageBuildingLevel + "]";
+                span.style.fontSize = "25px";
+                span.style.padding = "5px 5px";
+                span.style.background = "#FFC107";
+                span.style.zIndex = "300";
+                span.style.position = "relative";
+                div.appendChild(span);
+                container.appendChild(div);
+                for (const [key, value] of sortedMap) {
+                    const div = document.createElement("div");
+                    const span = document.createElement("span");
+                    span.innerHTML = key + " X " + value;
+                    span.style.fontSize = "25px";
+                    span.style.padding = "5px 5px";
+                    span.style.background = "#FFC107";
+                    span.style.zIndex = "300";
+                    span.style.position = "relative";
+                    div.appendChild(span);
+                    container.appendChild(div);
+                }
+                const board = document.querySelector(`div.css-1156ixp.e1addz3e7 div.css-7ip5xj.e1addz3e6`);
+                board.insertBefore(container, board.firstChild);
+
+                // 移动展柜至下方
+                const row = document.querySelector(`div.col-md-8 > div.row`);
+                const target = row.querySelector(`div.col-sm-12`);
+                if (target) {
+                    target.parentNode.appendChild(target);
+                }
+            }
+        };
+        let timer = setInterval(checkElementExist, 100);
     }
 
     function handleExchangeHighlightRecent() {
@@ -104,6 +271,8 @@
                     };
                     selectedElem.parentNode.parentNode.parentNode.appendChild(a);
                 }
+                // 显示SimcoTools API信息
+                handleSimcoToolsAPI();
             }
         };
         let timer = setInterval(checkElementExist, 100);
@@ -171,7 +340,9 @@
         const checkElementExist = () => {
             const table = document.querySelector(`.css-1vwotq4.e12j7voa6`);
             const input = document.querySelector(`input[name="price"]`);
+            const amountSpans = document.querySelectorAll(`div.css-81vhsj.e12j7voa12 span.css-14is9qy.e12j7voa17`);
             if (table && input && !input.classList.contains("script_checked")) {
+                // 出售时自动填价
                 let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent.replace(",", ""));
                 let discountedPrice = exchangePrice * 0.97;
                 exchangePrice = exchangePrice.toFixed(3);
@@ -203,6 +374,20 @@
                     setInput(input, exchangePrice);
                     elem.style.background = "#FFC107";
                 }
+            } else if (table && amountSpans.length >= 2 && !amountSpans[0].classList.contains("script_checked")) {
+                // 查看商品时显示预估总价值
+                amountSpans[0].classList.add("script_checked");
+                let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent.replace(",", ""));
+                let discountedPrice = exchangePrice * 0.97;
+                let itemAmount = Number(amountSpans[0].textContent.replace(",", ""));
+                let totalValue = discountedPrice * itemAmount;
+                totalValue = totalValue.toFixed(0);
+                const newContainer = document.createElement("span");
+                const newTextNode = document.createTextNode("(总价值 $" + numberAddCommas(totalValue) + ")");
+                newContainer.appendChild(newTextNode);
+                newContainer.style.background = "#FFC107";
+                newContainer.style.fontSize = "18px";
+                amountSpans[0].nextSibling.nextSibling.after(newContainer);
             }
         };
         const tempTimer = setInterval(checkElementExist, 500);
@@ -263,11 +448,11 @@
 
         // 百科 左右栏比例1:1
         GM_addStyle(`
-        div.container.css-q9fi5t.ef8ljhx0 .col-md-4 {
+        div.container.css-q9fi5t.ef8ljhx0 .col-md-4:has(> :last-child:nth-child(1)) {
             width: 50% !important;
         }`);
         GM_addStyle(`
-        div.container.css-q9fi5t.ef8ljhx0 .col-md-8 {
+        div.container.css-q9fi5t.ef8ljhx0 .col-md-8:has(> :last-child:nth-child(1)) {
             width: 50% !important;
         }`);
 
@@ -287,11 +472,11 @@
 
         // 交易所 左右栏比例1:1
         GM_addStyle(`
-        div.css-fbokx6.container .col-sm-4 {
+        div.css-1nu3wfe div.css-fbokx6.container .col-sm-4 {
             width: 50% !important;
         }`);
         GM_addStyle(`
-        div.css-fbokx6.container .col-sm-8 {
+        div.css-1nu3wfe div.css-fbokx6.container .col-sm-8 {
             width: 50% !important;
         }`);
 
@@ -347,6 +532,11 @@
             position:fixed !important;
             top:6% !important;
             border:1px solid black !important;
+            z-index: 300 !important;
+        }`);
+        GM_addStyle(`
+        div.css-1k5wut2 > .container.css-q9fi5t.ef8ljhx0 {
+            pointer-events: none !important;
         }`);
 
         // 聊天弹窗
@@ -396,6 +586,14 @@
             background-color: #DCDCDC;
             max-width: 400px;
             max-height: 500px;
+        }`);
+
+        // 市场图表
+        GM_addStyle(`
+        div#script_market_container {
+            width: 100%;
+            height: 300px;
+            background-color: #B2D7DA;
         }`);
     }
 
@@ -470,5 +668,9 @@
         } else {
             notesElement.style.display = "none";
         }
+    }
+
+    function numberAddCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 })();
