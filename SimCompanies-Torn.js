@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  None
-// @author       bot_7420
+// @version      1.6
+// @description  Enhancements for SimCompanies web game. Complies with scripting rules of the game.
+// @author       MOBIL SUPER (bot_7420)
 // @match        https://www.simcompanies.com/*
 // @require      https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.0/chart.umd.js
 // @require      https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js
@@ -17,7 +17,7 @@
     "use strict";
 
     // 交易所页面自定义输入价格
-    const CustomExchangeInputPrices = [3840, 2880, 60];
+    const CustomExchangeInputPrices = [0, 3840, 2880, 60];
 
     let pageSpecifiedTimersList = [];
     let notesElement = null;
@@ -45,7 +45,7 @@
     };
 
     function handleURLChange(currentURL) {
-        console.log("SimCompanies-Torn: handleURLChange " + currentURL);
+        console.log("SimCompanies-Torn: handleURLChange");
         while (pageSpecifiedTimersList.length > 0) {
             clearInterval(pageSpecifiedTimersList.pop());
         }
@@ -83,6 +83,7 @@
                 if (!container) {
                     container = document.createElement("div");
                     container.id = "script_market_container";
+                    container.style.padding = "0px 5px";
                     parent.insertBefore(container, parent.firstChild);
                 } else {
                     container.innerHTML = "";
@@ -94,7 +95,7 @@
                 }
                 const array = window.location.href.split("/");
                 let itemId = array[array.length - 2];
-                console.log("SimCompanies-Torn: handleSimcoToolsAPI " + realm + itemId);
+                console.log("SimCompanies-Torn: handleSimcoToolsAPI " + realm + " " + itemId);
 
                 GM_xmlhttpRequest({
                     method: "GET",
@@ -108,11 +109,11 @@
                         let text =
                             "当前: $" +
                             json.latest_price.toFixed(3) +
-                            "&nbsp;&nbsp;&nbsp;日均: $" +
+                            "<br>日均: $" +
                             json.prices_resume.average.toFixed(3) +
-                            "&nbsp;&nbsp;&nbsp;日最高: $" +
+                            "&nbsp;&nbsp;&nbsp;最高: $" +
                             json.prices_resume.max.toFixed(3) +
-                            "&nbsp;&nbsp;&nbsp;日最低: $" +
+                            "&nbsp;&nbsp;&nbsp;最低: $" +
                             json.prices_resume.min.toFixed(3);
                         p.innerHTML = text;
                         p.style.fontSize = "18px";
@@ -130,50 +131,54 @@
                         const json = JSON.parse(response.response);
                         const div = document.createElement("div");
                         div.style.width = "100%";
-                        div.style.height = "260px";
+                        div.style.height = "240px";
                         const canvas = document.createElement("canvas");
                         canvas.id = "script_market_canvas";
                         div.appendChild(canvas);
                         container.appendChild(div);
-                        new Chart(canvas, {
-                            type: "line",
-                            data: {
-                                datasets: [
-                                    {
-                                        data: json.history,
-                                        pointRadius: 0,
-                                    },
-                                ],
-                            },
-                            options: {
-                                parsing: {
-                                    xAxisKey: "date",
-                                    yAxisKey: "average",
-                                },
-                                scales: {
-                                    x: {
-                                        type: "time",
-                                        time: {
-                                            unit: "day",
-                                            tooltipFormat: "yyyy-MM-dd",
-                                            displayFormats: {
-                                                day: "MM-dd",
-                                            },
-                                        },
-                                    },
-                                },
-                                plugins: {
-                                    legend: {
-                                        display: false,
-                                    },
-                                },
-                            },
-                        });
+                        buildChart(canvas, json.history);
                     },
                 });
             }
         };
         let timer = setInterval(checkElementExist, 100);
+    }
+
+    function buildChart(canvas, data) {
+        new Chart(canvas, {
+            type: "line",
+            data: {
+                datasets: [
+                    {
+                        data: data,
+                        pointRadius: 0,
+                    },
+                ],
+            },
+            options: {
+                parsing: {
+                    xAxisKey: "date",
+                    yAxisKey: "average",
+                },
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            unit: "day",
+                            tooltipFormat: "yyyy-MM-dd",
+                            displayFormats: {
+                                day: "MM-dd",
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                },
+            },
+        });
     }
 
     function handleProfilePage() {
@@ -342,7 +347,7 @@
             const input = document.querySelector(`input[name="price"]`);
             const amountSpans = document.querySelectorAll(`div.css-81vhsj.e12j7voa12 span.css-14is9qy.e12j7voa17`);
             if (table && input && !input.classList.contains("script_checked")) {
-                // 出售时自动填价
+                // 出售时自动填价 当前MP
                 let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent.replace(",", ""));
                 let discountedPrice = exchangePrice * 0.97;
                 exchangePrice = exchangePrice.toFixed(3);
@@ -350,7 +355,7 @@
                 input.classList.add("script_checked");
 
                 let elem = document.createElement("a");
-                let linkText = document.createTextNode("MP = $" + exchangePrice);
+                let linkText = document.createTextNode("当前MP = $" + exchangePrice);
                 elem.appendChild(linkText);
                 elem.onclick = () => {
                     setInput(input, exchangePrice);
@@ -359,7 +364,7 @@
                 input.parentNode.insertBefore(elem, input.nextSibling);
 
                 let elem2 = document.createElement("a");
-                let linkText2 = document.createTextNode("MP-3% = $" + discountedPrice);
+                let linkText2 = document.createTextNode("当前MP-3% = $" + discountedPrice);
                 elem2.appendChild(linkText2);
                 elem2.onclick = () => {
                     setInput(input, discountedPrice);
@@ -374,8 +379,39 @@
                     setInput(input, exchangePrice);
                     elem.style.background = "#FFC107";
                 }
+            } else if (table && input && input.classList.contains("script_checked") && !input.classList.contains("script_checked_2") && amountSpans[0].classList.contains("script_checked")) {
+                // 出售时自动填价 日均MP
+                let avg = Number(amountSpans[0].getAttribute("script-avg-mp").replace(",", ""));
+                let discountedAvg = avg * 0.97;
+                avg = avg.toFixed(3);
+                discountedAvg = discountedAvg.toFixed(3);
+                input.classList.add("script_checked_2");
+
+                let elem = document.createElement("a");
+                let linkText = document.createTextNode("日均MP = $" + avg);
+                elem.appendChild(linkText);
+                elem.onclick = () => {
+                    setInput(input, avg);
+                };
+                elem.style.display = "block";
+                input.parentNode.appendChild(elem);
+
+                let elem2 = document.createElement("a");
+                let linkText2 = document.createTextNode("日均MP-3% = $" + discountedAvg);
+                elem2.appendChild(linkText2);
+                elem2.onclick = () => {
+                    setInput(input, discountedAvg);
+                };
+                elem2.style.display = "block";
+                input.parentNode.appendChild(elem2);
+
+                if (document.querySelector(`h3.css-bi2xxi.e1bf4c272`).innerText === "收件方") {
+                    elem2.style.background = "#FFC107";
+                } else {
+                    elem.style.background = "#FFC107";
+                }
             } else if (table && amountSpans.length >= 2 && !amountSpans[0].classList.contains("script_checked")) {
-                // 查看商品时显示预估总价值
+                // 查看单个商品时 显示预估总价值
                 amountSpans[0].classList.add("script_checked");
                 let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent.replace(",", ""));
                 let discountedPrice = exchangePrice * 0.97;
@@ -383,11 +419,75 @@
                 let totalValue = discountedPrice * itemAmount;
                 totalValue = totalValue.toFixed(0);
                 const newContainer = document.createElement("span");
-                const newTextNode = document.createTextNode("(总价值 $" + numberAddCommas(totalValue) + ")");
+                const newTextNode = document.createTextNode("(当前MP-3%总价值 $" + numberAddCommas(totalValue) + ")");
                 newContainer.appendChild(newTextNode);
                 newContainer.style.background = "#FFC107";
                 newContainer.style.fontSize = "18px";
                 amountSpans[0].nextSibling.nextSibling.after(newContainer);
+
+                // 查看单个商品时 显示API图表
+                const parent = document.querySelector(`div.css-1iegaby.e12j7voa18 > div.row`).children[1];
+                let container = document.querySelector(`div#script_market_container`);
+                if (!container) {
+                    container = document.createElement("div");
+                    container.id = "script_market_container";
+                    container.style.padding = "0px 5px";
+                    parent.insertBefore(container, parent.firstChild);
+                } else {
+                    container.innerHTML = "";
+                }
+
+                let realm = 0;
+                if (document.querySelector(`div.css-inxa61.e1uuitfi4 img[alt*="企业家"]`)) {
+                    realm = 1;
+                }
+                const array = table.parentNode.href.split("/");
+                let itemId = array[array.length - 2];
+                console.log("SimCompanies-Torn: handleSimcoToolsAPI " + realm + " " + itemId);
+
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}`,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (response) {
+                        const json = JSON.parse(response.response);
+                        amountSpans[0].setAttribute("script-avg-mp", json.prices_resume.average.toFixed(3));
+                        const p = document.createElement("p");
+                        let text =
+                            "当前: $" +
+                            json.latest_price.toFixed(3) +
+                            "<br>日均: $" +
+                            json.prices_resume.average.toFixed(3) +
+                            "&nbsp;&nbsp;&nbsp;最高: $" +
+                            json.prices_resume.max.toFixed(3) +
+                            "&nbsp;&nbsp;&nbsp;最低: $" +
+                            json.prices_resume.min.toFixed(3);
+                        p.innerHTML = text;
+                        p.style.fontSize = "18px";
+                        container.insertBefore(p, container.firstChild);
+                    },
+                });
+
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (response) {
+                        const json = JSON.parse(response.response);
+                        const div = document.createElement("div");
+                        div.style.width = "100%";
+                        div.style.height = "260px";
+                        const canvas = document.createElement("canvas");
+                        canvas.id = "script_market_canvas";
+                        div.appendChild(canvas);
+                        container.appendChild(div);
+                        buildChart(canvas, json.history);
+                    },
+                });
             }
         };
         const tempTimer = setInterval(checkElementExist, 500);
@@ -404,7 +504,7 @@
                 landscape_highlightIdleBuildings();
                 const tempTimer = setInterval(landscape_highlightIdleBuildings, 2000);
                 pageSpecifiedTimersList.push(tempTimer);
-                // 移动收菜图标至右上角
+                // 移动收菜图标
                 landscape_moveGatheringIcons();
                 const tempTimer2 = setInterval(landscape_moveGatheringIcons, 2000);
                 pageSpecifiedTimersList.push(tempTimer2);
@@ -526,17 +626,13 @@
             color: rgb(184,184,184);
         }`);
 
-        // 收菜图标移至右上角
+        // 收菜图标移动
         GM_addStyle(`
         .script_moved_to_top_right {
             position:fixed !important;
-            top:6% !important;
+            top:80% !important;
             border:1px solid black !important;
             z-index: 300 !important;
-        }`);
-        GM_addStyle(`
-        div.css-1k5wut2 > .container.css-q9fi5t.ef8ljhx0 {
-            pointer-events: none !important;
         }`);
 
         // 聊天弹窗
@@ -544,7 +640,7 @@
         .css-1tvnvpv {
             left: 5px !important;
             bottom: 5px !important;
-            max-width: 300px !important;
+            max-width: 350px !important;
             width: 100% !important;
             z-index: 300 !important;
         }`);
@@ -582,10 +678,10 @@
             bottom:1%;
             right:1%;
             z-index: 200;
-            font-size: 18px;
+            font-size: 16px;
             background-color: #DCDCDC;
             max-width: 400px;
-            max-height: 500px;
+            max-height: 600px;
         }`);
 
         // 市场图表
