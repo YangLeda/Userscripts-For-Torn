@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  Enhancements for SimCompanies web game. Complies with scripting rules of the game.
 // @author       MOBIL SUPER (bot_7420)
 // @match        https://www.simcompanies.com/*
@@ -121,22 +121,43 @@
                     },
                 });
 
+                // Add chart
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    onload: function (response) {
-                        const json = JSON.parse(response.response);
-                        const div = document.createElement("div");
-                        div.style.width = "100%";
-                        div.style.height = "240px";
-                        const canvas = document.createElement("canvas");
-                        canvas.id = "script_market_canvas";
-                        div.appendChild(canvas);
-                        container.appendChild(div);
-                        buildChart(canvas, json.history);
+                    onload: function (response3) {
+                        GM_xmlhttpRequest({
+                            method: "GET",
+                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=null&date=&period=1&comparison=previous`,
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            onload: function (response0) {
+                                const json3 = JSON.parse(response3.response);
+                                const json0 = JSON.parse(response0.response);
+                                let dataThreeMonths = json3.history;
+                                for (const record of json0.records) {
+                                    record.average = record.price;
+                                }
+                                let dataOneDay = json0.records;
+                                let dataOneMonth = [];
+                                for (let i = dataThreeMonths.length - 1; i > dataThreeMonths.length - 31; i--) {
+                                    dataOneMonth.push(dataThreeMonths[i]);
+                                }
+
+                                const div = document.createElement("div");
+                                div.style.width = "100%";
+                                div.style.height = "240px";
+                                const canvas = document.createElement("canvas");
+                                canvas.id = "script_market_canvas";
+                                div.appendChild(canvas);
+                                container.appendChild(div);
+                                buildChart(canvas, [dataOneDay, dataOneMonth, dataThreeMonths]);
+                            },
+                        });
                     },
                 });
             }
@@ -150,8 +171,21 @@
             data: {
                 datasets: [
                     {
-                        data: data,
+                        label: "1 Day",
+                        data: data[0],
                         pointRadius: 0,
+                    },
+                    {
+                        label: "1 Month",
+                        data: data[1],
+                        pointRadius: 0,
+                        hidden: true,
+                    },
+                    {
+                        label: "3 Months",
+                        data: data[2],
+                        pointRadius: 0,
+                        hidden: true,
                     },
                 ],
             },
@@ -164,17 +198,28 @@
                     x: {
                         type: "time",
                         time: {
-                            unit: "day",
-                            tooltipFormat: "yyyy-MM-dd",
+                            tooltipFormat: "yyyy/MM/dd HH:mm",
                             displayFormats: {
-                                day: "MM-dd",
+                                day: "MM/dd",
                             },
                         },
                     },
                 },
                 plugins: {
                     legend: {
-                        display: false,
+                        onClick: (e, legendItem, legend) => {
+                            let index = legendItem.datasetIndex;
+                            let ci = legend.chart;
+                            ci.data.datasets.forEach(function (e, i) {
+                                let meta = ci.getDatasetMeta(i);
+                                if (i !== index) {
+                                    meta.hidden = true;
+                                } else {
+                                    meta.hidden = false;
+                                }
+                            });
+                            ci.update();
+                        },
                     },
                 },
             },
@@ -470,22 +515,43 @@
                     },
                 });
 
+                // Add chart
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    onload: function (response) {
-                        const json = JSON.parse(response.response);
-                        const div = document.createElement("div");
-                        div.style.width = "100%";
-                        div.style.height = "260px";
-                        const canvas = document.createElement("canvas");
-                        canvas.id = "script_market_canvas";
-                        div.appendChild(canvas);
-                        container.appendChild(div);
-                        buildChart(canvas, json.history);
+                    onload: function (response3) {
+                        GM_xmlhttpRequest({
+                            method: "GET",
+                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=null&date=&period=1&comparison=previous`,
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            onload: function (response0) {
+                                const json3 = JSON.parse(response3.response);
+                                const json0 = JSON.parse(response0.response);
+                                let dataThreeMonths = json3.history;
+                                for (const record of json0.records) {
+                                    record.average = record.price;
+                                }
+                                let dataOneDay = json0.records;
+                                let dataOneMonth = [];
+                                for (let i = dataThreeMonths.length - 1; i > dataThreeMonths.length - 31; i--) {
+                                    dataOneMonth.push(dataThreeMonths[i]);
+                                }
+
+                                const div = document.createElement("div");
+                                div.style.width = "100%";
+                                div.style.height = "240px";
+                                const canvas = document.createElement("canvas");
+                                canvas.id = "script_market_canvas";
+                                div.appendChild(canvas);
+                                container.appendChild(div);
+                                buildChart(canvas, [dataOneDay, dataOneMonth, dataThreeMonths]);
+                            },
+                        });
                     },
                 });
             }
