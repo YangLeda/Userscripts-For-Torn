@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  Enhancements for SimCompanies web game. Complies with scripting rules of the game.
 // @author       MOBIL SUPER (bot_7420)
 // @match        https://www.simcompanies.com/*
@@ -21,6 +21,7 @@
 
     let pageSpecifiedTimersList = [];
     let notesElement = null;
+    let lastCompanyJson = null;
 
     let lastKnownURL = "";
     const mainCheckingURLLoop = () => {
@@ -30,6 +31,23 @@
             lastKnownURL = currentURL;
         }
     };
+
+    // Hook XMLHttpRequest https://www.simcompanies.com/api/v2/companies-by-company/0/XXXXXX/
+    (function (open) {
+        XMLHttpRequest.prototype.open = function () {
+            this.addEventListener(
+                "readystatechange",
+                function () {
+                    if (this.responseURL.indexOf("/companies-by-company/") != -1 && this.readyState === 4) {
+                        const json = JSON.parse(this.response);
+                        lastCompanyJson = json;
+                    }
+                },
+                false
+            );
+            open.apply(this, arguments);
+        };
+    })(XMLHttpRequest.prototype.open);
 
     window.onload = () => {
         console.log("SimCompanies-Torn: onload");
@@ -249,7 +267,7 @@
                 const container = document.createElement("div");
                 const div = document.createElement("div");
                 const span = document.createElement("span");
-                span.innerHTML = "[建筑总数量: " + totalBuildingNum + "]   [总建筑等级: " + totalBuildingLevel + "]   [平均建筑等级: " + averageBuildingLevel + "]";
+                span.innerHTML = "建筑总数量: " + totalBuildingNum + "&emsp;总建筑等级: " + totalBuildingLevel + "&emsp;平均建筑等级: " + averageBuildingLevel;
                 span.style.fontSize = "25px";
                 span.style.padding = "5px 5px";
                 span.style.background = "#FFC107";
@@ -261,7 +279,7 @@
                     const div = document.createElement("div");
                     const span = document.createElement("span");
                     span.innerHTML = key + " X " + value;
-                    span.style.fontSize = "25px";
+                    span.style.fontSize = "22px";
                     span.style.padding = "5px 5px";
                     span.style.background = "#FFC107";
                     span.style.zIndex = "300";
@@ -278,6 +296,40 @@
                 if (target) {
                     target.parentNode.appendChild(target);
                 }
+
+                // API查询历史数据
+                const id = lastCompanyJson.company.id;
+                const name = lastCompanyJson.company.company;
+                const level = lastCompanyJson.company.level;
+                const realmId = lastCompanyJson.company.realmId;
+                console.log("SimCompanies-Torn: handleProfilePage " + realmId + " " + id + " " + name);
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://simcotools.app/api/v2/companies/${realmId}/${id}`,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (response) {
+                        const valueList = JSON.parse(response.response).historical;
+                        let average = 0;
+                        let size = valueList.length > 7 ? 7 : valueList.length - 1;
+                        for (let i = 0; i < size; i++) {
+                            average += valueList[valueList.length - 1 - i].value - valueList[valueList.length - 2 - i].value;
+                        }
+                        average /= size;
+
+                        const div = document.createElement("div");
+                        const span = document.createElement("span");
+                        span.innerHTML = name + " [" + id + "]&emsp;公司等级: " + level + "&emsp;近一周日均增长: $" + numberAddCommas(average.toFixed(0));
+                        span.style.fontSize = "25px";
+                        span.style.padding = "5px 5px";
+                        span.style.background = "#FFC107";
+                        span.style.zIndex = "300";
+                        span.style.position = "relative";
+                        div.appendChild(span);
+                        container.insertBefore(div, container.firstChild);
+                    },
+                });
             }
         };
         let timer = setInterval(checkElementExist, 100);
@@ -756,6 +808,12 @@
             width: 100%;
             height: 300px;
             background-color: #B2D7DA;
+        }`);
+
+        // 隐藏氪金促销图标
+        GM_addStyle(`
+        a.css-s50znf > div.css-xgljd5 {
+            visibility: hidden;
         }`);
     }
 
