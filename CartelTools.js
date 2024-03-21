@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CartelTools
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  None.
 // @author       BOT7420 [3094]
 // @match        https://cartelempire.online/*
