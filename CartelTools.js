@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CartelTools
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  None.
 // @author       BOT7420 [3094]
 // @match        https://cartelempire.online/*
@@ -13,8 +13,9 @@
 (async function () {
     "use strict";
 
-    let API_KEY = "XXXXXXXXXX"; // 填写自己的APIKey
+    let API_KEY = "XXXXXXXXXX"; // 这里改成自己的APIKey
 
+    /* 以下不需要修改 */
     if (API_KEY && API_KEY !== "XXXXXXXXXX") {
         localStorage.setItem("script_api_key", API_KEY);
     } else if (localStorage.getItem("script_api_key")) {
@@ -66,7 +67,11 @@
     }
 
     function getSelfTotalBS() {
-        if (localStorage.getItem("script_self_total_bs_timestamp") && Date.now() - Number(localStorage.getItem("script_self_total_bs_timestamp")) < 1800000) {
+        if (
+            localStorage.getItem("script_self_total_bs_timestamp") &&
+            Date.now() - Number(localStorage.getItem("script_self_total_bs_timestamp")) < 1800000 &&
+            Number.isNaN(localStorage.getItem("script_self_total_bs"))
+        ) {
             return Number(localStorage.getItem("script_self_total_bs"));
         }
 
