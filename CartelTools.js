@@ -39,7 +39,7 @@
                 clearInterval(timer);
                 if (selectedElem.querySelector(`td`).querySelectorAll(`a`).length > 1) {
                     console.log("[CartelTools] handleFightLogPage fight not involving self");
-                    //return;
+                    return;
                 }
                 const FFElem = document.querySelector(`div.card-body div`).querySelectorAll(`div.card-body div`)[1].querySelector(`span`);
                 const FF = Number(FFElem.innerHTML.substring(1));
