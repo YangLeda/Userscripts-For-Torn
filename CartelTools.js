@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CartelTools
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  None.
 // @author       BOT7420 [3094]
 // @match        https://cartelempire.online/*
@@ -23,16 +23,19 @@
         console.log("[CartelTools] No API Key!");
     }
 
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.toLowerCase();
 
-    if (currentURL.includes("/Fight/")) {
+    if (currentURL.includes("/fight/")) {
         await handleFightLogPage();
+    } else if (currentURL.includes("/user/")) {
+        const urlSplit = currentURL.split("/");
+        const id = urlSplit[urlSplit.length - 1];
+        handleProfilePage(id);
     }
 
     async function handleFightLogPage() {
         console.log("[CartelTools] handleFightLogPage");
         const selfTotalBS = await getSelfTotalBS();
-
         const checkElementExist = () => {
             const selectedElem = document.querySelector(`div.table-responsive.fightTable`);
             if (selectedElem) {
@@ -41,16 +44,22 @@
                     console.log("[CartelTools] handleFightLogPage fight not involving self");
                     return;
                 }
+                const logElem = selectedElem.querySelector(`td`).querySelector(`a`);
+                const hrefSplit = logElem.href.split("/");
+                const opponentId = hrefSplit[hrefSplit.length - 1];
+                const opponentName = logElem.innerHTML.substring(1);
+
                 const FFElem = document.querySelector(`div.card-body div`).querySelectorAll(`div.card-body div`)[1].querySelector(`span`);
                 const FF = Number(FFElem.innerHTML.substring(1));
-                let resultString = "Error";
+                let estimateBSString = "Error";
                 if (FF > 1 && FF < 3) {
-                    let estimateBS = ((FF - 1) / 8) * 3 * selfTotalBS;
-                    resultString = "估计对手总BS = " + estimateBS.toFixed(0);
+                    estimateBSString = "" + (((FF - 1) / 8) * 3 * selfTotalBS).toFixed(0);
                 } else if (FF == 3) {
-                    resultString = "估计对手总BS > " + (selfTotalBS * 0.75).toFixed(0);
+                    estimateBSString = ">" + (selfTotalBS * 0.75).toFixed(0);
                 }
-                FFElem.innerHTML += "<br>" + resultString;
+                FFElem.innerHTML += "<br>估计对手总BS " + estimateBSString;
+
+                saveEstimateBS(opponentId, opponentName, estimateBSString);
             }
         };
         let timer = setInterval(checkElementExist, 100);
@@ -81,5 +90,52 @@
                 },
             });
         });
+    }
+
+    function saveEstimateBS(opponentId, opponentName, estimateBSString) {
+        let map = null;
+        if (localStorage.getItem("script_estimate_bs_list")) {
+            map = new Map(JSON.parse(localStorage.getItem("script_estimate_bs_list")));
+        } else {
+            map = new Map();
+        }
+        let obj = map.get(opponentId);
+        if (!obj) {
+            obj = {};
+            obj.playerId = opponentId;
+            obj.playerName = opponentName;
+            obj.recordList = [];
+            map.set(opponentId, obj);
+        }
+        obj.recordList = []; // Curretly only keep one record
+        obj.recordList.push(estimateBSString);
+        localStorage.setItem("script_estimate_bs_list", JSON.stringify(Array.from(map.entries())));
+        console.log(map);
+    }
+
+    function readEstimateBS(playerId) {
+        let map = null;
+        if (localStorage.getItem("script_estimate_bs_list")) {
+            map = new Map(JSON.parse(localStorage.getItem("script_estimate_bs_list")));
+        } else {
+            return null;
+        }
+        console.log(map);
+        return map.get(playerId)?.recordList[0];
+    }
+
+    function handleProfilePage(id) {
+        console.log("[CartelTools] handleProfilePage");
+        const checkElementExist = () => {
+            const selectedElem = document.querySelector(`div.header-section h2 svg`);
+            if (selectedElem) {
+                clearInterval(timer);
+                const bsString = readEstimateBS(id);
+                if (bsString) {
+                    selectedElem.parentElement.innerHTML += "&nbsp;&nbsp;估计总BS " + bsString;
+                }
+            }
+        };
+        let timer = setInterval(checkElementExist, 100);
     }
 })();
