@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         CartelTools
 // @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  Estimates BS when viewing fight logs of successful attacks from yourself. Uploads to and fetch records from CEStats server.
+// @version      1.7
+// @description  For the CartelEmpire game. Estimates BS when viewing fight logs of successful attacks from yourself. Uploads to and fetch records from CEStats server.
 // @author       BOT7420 [3094]
 // @match        https://cartelempire.online/*
 // @grant        GM_addStyle
@@ -75,7 +75,7 @@
                 newButton.addEventListener("click", async () => {
                     newButton.disabled = true;
                     newButton.textContent = "正在上传...";
-                    const result = await uploadToSES(logId, opponentId, opponentName, estimateBSString, selfId, selfName);
+                    const result = await uploadToSES(logId, opponentId, opponentName, estimateBSString, selfId, selfName, "一键上传");
                     console.log(result);
                     newButton.textContent = result;
                     newButton.disabled = false;
@@ -86,7 +86,7 @@
         let timer = setInterval(checkElementExist, 100);
     }
 
-    function uploadToSES(logId, opponentId, opponentName, estimateBSString, selfId, selfName) {
+    function uploadToSES(logId, opponentId, opponentName, estimateBSString, selfId, selfName, reportSource) {
         let model = {
             reporterId: selfId,
             reporterName: selfName,
@@ -96,7 +96,7 @@
             logId: logId,
             logTimestamp: null,
             reportTimestamp: Date.now(),
-            reportSource: "一键上传",
+            reportSource: reportSource,
         };
 
         console.log(model);
@@ -110,6 +110,9 @@
                 },
                 data: JSON.stringify(model),
                 onload: function (response) {
+                    if (!response || !response.response) {
+                        resolve("网络错误");
+                    }
                     const json = JSON.parse(response.response);
                     console.log(json);
                     if (json.httpStatus === 200 && json.success === true && json.message) {
@@ -136,6 +139,9 @@
                     "Content-Type": "application/json",
                 },
                 onload: function (response) {
+                    if (!response || !response.response) {
+                        resolve("网络错误");
+                    }
                     const json = JSON.parse(response.response);
                     console.log(json);
                     if (json.httpStatus === 200 && json.success === true && json.result) {
@@ -147,7 +153,7 @@
                 onerror: function (error) {
                     console.log("onerror");
                     console.log(error);
-                    resolve("网络错误");
+                    resolve("网络错误onerror");
                 },
             });
         });
@@ -230,9 +236,15 @@
             const selectedElem = document.querySelector(`div.header-section h2 svg`);
             if (selectedElem) {
                 clearInterval(timer);
+                await getSelfTotalBS();
+                const selfId = localStorage.getItem("script_self_id");
+                const selfName = localStorage.getItem("script_self_name");
+                let targetName = "";
+
                 const bsString = readEstimateBS(id);
                 if (bsString && bsString.logList && bsString.logList[0]) {
-                    selectedElem.parentElement.innerHTML += "&nbsp;&nbsp;估计总BS " + bsString.logList[0].estimateBSString;
+                    targetName = selectedElem.parentElement.innerText.substring(1);
+                    selectedElem.parentElement.parentElement.innerHTML += "&nbsp;&nbsp;估计总BS " + bsString.logList[0].estimateBSString;
                 }
 
                 const card = document.querySelector(`img.img-thumbnail`).parentElement.parentElement.parentElement;
@@ -262,6 +274,34 @@
                 }
                 div.setAttribute("class", "row");
                 card.appendChild(div);
+
+                const manualUploadDiv = document.createElement("div");
+                let input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = "输入预估对方BS";
+                manualUploadDiv.appendChild(input);
+
+                const newButton = document.createElement("button");
+                newButton.textContent = "手动上传BS至CEStats";
+                newButton.style.backgroundColor = "green";
+                newButton.addEventListener("click", async () => {
+                    const estimateBSString = input.value;
+                    if (!estimateBSString) {
+                        alert("输入不能为空");
+                        return;
+                    }
+                    if (confirm("是否上传：" + targetName + " " + estimateBSString) === false) {
+                        return;
+                    }
+                    newButton.disabled = true;
+                    newButton.textContent = "正在上传...";
+                    const result = await uploadToSES(Date.now(), id, targetName, estimateBSString, selfId, selfName, "手动上传");
+                    console.log(result);
+                    newButton.textContent = result;
+                    newButton.disabled = false;
+                });
+                manualUploadDiv.appendChild(newButton);
+                card.appendChild(manualUploadDiv);
             }
         };
         let timer = setInterval(checkElementExist, 100);
