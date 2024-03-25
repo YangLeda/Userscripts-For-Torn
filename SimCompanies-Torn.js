@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.9
 // @description  Enhancements for SimCompanies web game. Complies with scripting rules of the game.
 // @author       MOBIL SUPER (bot_7420)
 // @match        https://www.simcompanies.com/*
@@ -16,8 +16,9 @@
 (function () {
     "use strict";
 
-    // 交易所页面自定义输入价格
-    const CustomExchangeInputPrices = [0, 3840, 2880, 60];
+    const CustomExchangeInputPrices = [0, 3840, 2880, 60]; // 交易所页面，自定义输入购买数量按钮
+    const CustomProductionTimeInputs = ["8am", "10pm", "6hr", "12hr"]; // 生产页面，自定义输入生产时间按钮
+    const ContractDiscount = 0.98; // 出售商品页面，合同MP价折扣
 
     let pageSpecifiedTimersList = [];
     let notesElement = null;
@@ -402,36 +403,22 @@
                 clearInterval(timer);
                 selectedElems.forEach((node) => {
                     let targetNode = node.parentElement.parentElement.querySelector("div > button").parentElement;
-
-                    let newNode = document.createElement("button");
-                    newNode.className = "script_custom_hour_button";
-                    Object.assign(newNode, { type: "button", role: "button" });
-                    newNode.onclick = (e) => {
-                        let target_node = e.target.parentElement.parentElement.querySelector("input");
-                        let target_text = e.target.innerText;
-                        target_node.click();
-                        setInput(target_node, target_text);
-                        e.preventDefault();
-                    };
-                    let commonClass = targetNode.querySelector("button").className;
-                    newNode.className += ` ${commonClass}`;
-                    newNode.innerText = "12hr";
-                    targetNode.prepend(newNode);
-
-                    let newNode2 = document.createElement("button");
-                    newNode2.className = "script_custom_hour_button";
-                    Object.assign(newNode2, { type: "button", role: "button" });
-                    newNode2.onclick = (e) => {
-                        let target_node = e.target.parentElement.parentElement.querySelector("input");
-                        let target_text = e.target.innerText;
-                        target_node.click();
-                        setInput(target_node, target_text);
-                        e.preventDefault();
-                    };
-                    let commonClass2 = targetNode.querySelector("button").className;
-                    newNode2.className += ` ${commonClass2}`;
-                    newNode2.innerText = "6hr";
-                    targetNode.prepend(newNode2);
+                    for (const text of CustomProductionTimeInputs) {
+                        let newNode = document.createElement("button");
+                        newNode.className = "script_custom_hour_button";
+                        Object.assign(newNode, { type: "button", role: "button" });
+                        newNode.onclick = (e) => {
+                            let target_node = e.target.parentElement.parentElement.querySelector("input");
+                            let target_text = e.target.innerText;
+                            target_node.click();
+                            setInput(target_node, target_text);
+                            e.preventDefault();
+                        };
+                        let commonClass = targetNode.querySelector("button").className;
+                        newNode.className += ` ${commonClass}`;
+                        newNode.innerText = text;
+                        targetNode.prepend(newNode);
+                    }
                 });
             }
         };
@@ -446,7 +433,7 @@
             if (table && input && !input.classList.contains("script_checked")) {
                 // 出售时自动填价 当前MP
                 let exchangePrice = Number(table.querySelector("span.css-rnnx2x").nextSibling.nextSibling.textContent.replace(",", ""));
-                let discountedPrice = exchangePrice * 0.97;
+                let discountedPrice = exchangePrice * ContractDiscount;
                 exchangePrice = exchangePrice.toFixed(3);
                 discountedPrice = discountedPrice.toFixed(3);
                 input.classList.add("script_checked");
@@ -461,7 +448,7 @@
                 input.parentNode.insertBefore(elem, input.nextSibling);
 
                 let elem2 = document.createElement("a");
-                let linkText2 = document.createTextNode("当前MP-3% = $" + discountedPrice);
+                let linkText2 = document.createTextNode("当前MP-" + ((1 - ContractDiscount) * 100).toFixed(0) + "% = $" + discountedPrice);
                 elem2.appendChild(linkText2);
                 elem2.onclick = () => {
                     setInput(input, discountedPrice);
@@ -479,7 +466,7 @@
             } else if (table && input && input.classList.contains("script_checked") && !input.classList.contains("script_checked_2") && amountSpans[0].classList.contains("script_checked")) {
                 // 出售时自动填价 日均MP
                 let avg = Number(amountSpans[0].getAttribute("script-avg-mp").replace(",", ""));
-                let discountedAvg = avg * 0.97;
+                let discountedAvg = avg * ContractDiscount;
                 avg = avg.toFixed(3);
                 discountedAvg = discountedAvg.toFixed(3);
                 input.classList.add("script_checked_2");
@@ -494,7 +481,7 @@
                 input.parentNode.appendChild(elem);
 
                 let elem2 = document.createElement("a");
-                let linkText2 = document.createTextNode("日均MP-3% = $" + discountedAvg);
+                let linkText2 = document.createTextNode("日均MP-" + ((1 - ContractDiscount) * 100).toFixed(0) + "% = $" + discountedAvg);
                 elem2.appendChild(linkText2);
                 elem2.onclick = () => {
                     setInput(input, discountedAvg);
