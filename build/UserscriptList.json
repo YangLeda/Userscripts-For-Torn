@@ -38,7 +38,7 @@
     "name": "ChatRecorder",
     "author": "bot_7420[2937420]",
     "description": "无限保存聊天记录",
-    "detail": "无限保存聊天记录，包括Poker/Faction/Company/Global",
+    "detail": "已失效，新版本为Chat2.0Recorder",
     "version": "2.7"
   },
   {
@@ -103,7 +103,7 @@
     "author": "bot_7420[2937420]",
     "description": "预选目的地，按空格键起飞",
     "detail": "预选目的地，按空格键起飞",
-    "version": "1.0"
+    "version": "1.1"
   },
   {
     "path": "BountyPreset.js",
@@ -119,7 +119,7 @@
     "author": "bot_7420[2937420]",
     "description": "记录Poker牌局历史",
     "detail": "记录Poker牌局历史",
-    "version": "1.1"
+    "version": "1.2"
   },
   {
     "path": "ShrinkImageInQuote.js",
@@ -143,6 +143,30 @@
     "author": "bot_7420[2937420]",
     "description": "禁止入院时公司等页面自动刷新",
     "detail": "禁止入院时公司等页面自动刷新",
+    "version": "1.0"
+  },
+  {
+    "path": "RRDailyProfit.js",
+    "name": "RRDailyProfit",
+    "author": "bot_7420[2937420]",
+    "description": "显示RR每日盈利",
+    "detail": "显示RR每日盈利",
+    "version": "1.2"
+  },
+  {
+    "path": "Chat2.0Recorder.js",
+    "name": "Chat2.0Recorder.js",
+    "author": "bot_7420[2937420]",
+    "description": "Chat2.0 记录所有聊天记录",
+    "detail": "Chat2.0 记录所有聊天记录",
+    "version": "1.2"
+  },
+  {
+    "path": "AutoFillMaxBazaarBuying.js",
+    "name": "AutoFillMaxBazaarBuying",
+    "author": "bot_7420[2937420]",
+    "description": "巴扎购物时自动填写最大数量",
+    "detail": "需要启用TornTools",
     "version": "1.0"
   }
 ]

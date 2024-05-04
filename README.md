@@ -13,7 +13,7 @@ RW结算页面显示所有奖励价值
 >RW结算页面显示所有奖励价值  
 ## 5. [ChatRecorder](userscripts/ChatRecorder.js) 2.7&emsp;&emsp;bot_7420[2937420] 
 无限保存聊天记录
->无限保存聊天记录，包括Poker/Faction/Company/Global  
+>已失效，新版本为Chat2.0Recorder  
 ## 6. [巴扎按堆叠总价排序](userscripts/巴扎按堆叠总价排序.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 巴扎按堆叠总价排序，而不是单价
 >巴扎按堆叠总价排序，而不是单价  
@@ -35,13 +35,13 @@ PI取钱添加数个预设金额按钮；按空格存钱
 ## 12. [悬浮按钮存钱](userscripts/悬浮按钮存钱.js) 2.0&emsp;&emsp;bot_7420[2937420] 
 悬浮按钮狂点存钱，支持PI/公司/帮派/GhostTrade
 >悬浮按钮狂点存钱，支持PI/公司/帮派/GhostTrade  
-## 13. [快速起飞](userscripts/快速起飞.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+## 13. [快速起飞](userscripts/快速起飞.js) 1.1&emsp;&emsp;bot_7420[2937420] 
 预选目的地，按空格键起飞
 >预选目的地，按空格键起飞  
 ## 14. [BountyPreset](userscripts/BountyPreset.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 Bounty页面自动填写金额
 >代码第15行修改金额  
-## 15. [PokerHistory](userscripts/PokerHistory.js) 1.1&emsp;&emsp;bot_7420[2937420] 
+## 15. [PokerHistory](userscripts/PokerHistory.js) 1.2&emsp;&emsp;bot_7420[2937420] 
 记录Poker牌局历史
 >记录Poker牌局历史  
 ## 16. [ShrinkImageInQuote](userscripts/ShrinkImageInQuote.js) 1.0&emsp;&emsp;bot_7420[2937420] 
@@ -53,3 +53,12 @@ Bounty页面自动填写金额
 ## 18. [NoPageRefreshWhenHosped](userscripts/NoPageRefreshWhenHosped.js) 1.0&emsp;&emsp;bot_7420[2937420] 
 禁止入院时公司等页面自动刷新
 >禁止入院时公司等页面自动刷新  
+## 19. [RRDailyProfit](userscripts/RRDailyProfit.js) 1.2&emsp;&emsp;bot_7420[2937420] 
+显示RR每日盈利
+>显示RR每日盈利  
+## 20. [Chat2.0Recorder.js](userscripts/Chat2.0Recorder.js) 1.2&emsp;&emsp;bot_7420[2937420] 
+Chat2.0 记录所有聊天记录
+>Chat2.0 记录所有聊天记录  
+## 21. [AutoFillMaxBazaarBuying](userscripts/AutoFillMaxBazaarBuying.js) 1.0&emsp;&emsp;bot_7420[2937420] 
+巴扎购物时自动填写最大数量
+>需要启用TornTools  
