@@ -4,7 +4,7 @@
 >定时地扫描bazaar, 在商品低于设定价格时发出通知  
 ## 2. [bazaar助手](userscripts/bazaar_price_helper.js) v1.1.0&emsp;&emsp;mirrorhye[2564936], bot_7420[2937420] 
 bazaar自动填价（修复需要手动清空价格）
->bazaar自动填价  
+>此插件并非我原作，我不再继续更新此插件  
 ## 3. [气泡美化聊天窗](userscripts/ChatBubbles.js) 2.1.0&emsp;&emsp;Pi77Bull[2082618], bot_7420[2937420] 
 气泡美化聊天窗（修复显示问题并兼容冰蛙）
 >气泡美化聊天窗  

@@ -12,7 +12,7 @@
     "name": "bazaar助手",
     "author": "mirrorhye[2564936], bot_7420[2937420]",
     "description": "bazaar自动填价（修复需要手动清空价格）",
-    "detail": "bazaar自动填价",
+    "detail": "此插件并非我原作，我不再继续更新此插件",
     "match": "torn.com/bazaar",
     "version": "v1.1.0"
   },
